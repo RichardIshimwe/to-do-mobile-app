@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import * as SQLite from 'react-native-sqlite-storage';
 import Todo from './Todo';
 
 interface TodoItem {

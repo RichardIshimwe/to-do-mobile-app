@@ -10,8 +10,8 @@ interface TodoProps {
 const Todo: React.FC<TodoProps> = ({ text, isToggled }) => {
   return (
     <View style={styles.container}>
-      <TextInput style={styles.todoText}>{text}</TextInput>
-      {/* <Text style={[styles.todoText, isToggled && styles.toggled]}>{text}</Text> */}
+      {/* <TextInput style={styles.todoText}>{text}</TextInput> */}
+      <Text style={[styles.todoText, isToggled && styles.toggled]}>{text}</Text>
     </View>
   );
 };
