@@ -6,6 +6,7 @@ import {
   Button,
   TouchableOpacity,
 } from 'react-native';
+import { CheckBox } from 'react-native-elements';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Todo from './Todo';
 
@@ -52,14 +53,20 @@ const TodoList: React.FC = () => {
           <TouchableOpacity
           style={styles.todo}
             key={String(index)}
-            onPress={() => handleToggleTodo(index)}
+            // onPress={() => handleToggleTodo(index)}
           >
             <Todo
               key={String(index)}
               text={todo.text}
               isToggled={todo.isToggled}
             />
+            <View style={styles.iconsCont}>
+            <CheckBox
+            checked={todo.isToggled}
+            onPress={() => handleToggleTodo(index)}
+            />
             <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(index)}/>
+            </View>
           </TouchableOpacity>
         ))}
       </View>
@@ -72,31 +79,35 @@ export default TodoList;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
+    padding: 10,
+  },
+
+  iconsCont : {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 
   newTodoContainer: {
-    marginTop: 80,
+    marginTop: 30,
     marginBottom: 10,
   },
 
   newTodoInput: {
     height: 48,
     marginBottom: 20,
-
     borderWidth: 1,
     borderRadius: 5,
     borderColor: '#aaa',
-
     paddingHorizontal: 16,
-
     fontSize: 20,
   },
   todo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    // marginBottom: 5,
   },
   todosContainer: {
     flex: 1,
