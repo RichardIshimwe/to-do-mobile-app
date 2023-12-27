@@ -22,7 +22,9 @@ const TodoList: React.FC = () => {
   
   const [newTodo, setNewTodo] = useState('');
   const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [isEditing, setIsEditing] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currectId, setCurrentId] = useState(0); 
+  const [currentText, setCurrentText] = useState('');
 
   const db = SQLite.openDatabase('todos.db');
 
@@ -60,30 +62,40 @@ const TodoList: React.FC = () => {
   }, [])
 
 const handleCancelEdit = () => {
+  setNewTodo('');
   setIsEditing(false);
 }
 
-const handleSaveUpdate = useCallback(async (index: number) => {
-  //   let allTodos: TodoItem[] = [];
-  //  db.transaction((tx) => {
-  //   tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
-  //   });
-  //   tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-  //     let len = results.rows.length;
-  //     for(let i = 0; i < len; i++){
-  //       let row = results.rows.item(i);
-  //       let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
-  //       allTodos.push(finalRow); 
-  //     }
-  //     setTodos(allTodos);
-  //   })
-  //  });
-  //   setNewTodo('');
-  }, [newTodo]);
+const handleSaveUpdate = async () => {
+  console.log('id : ', currectId);
+  console.log('text : ', currentText);
+    let allTodos: TodoItem[] = [];
+   db.transaction((tx) => {
+    tx.executeSql('UPDATE todos SET text = ? WHERE id = ?', [currentText,currectId], (tx, result) => {
+    })
+    tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+      let len = results.rows.length;
+      for(let i = 0; i < len; i++){
+        let row = results.rows.item(i);
+        let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+        allTodos.push(finalRow); 
+      }
+      setTodos(allTodos);
+    })
+   });
+  setCurrentId(0); 
+  setCurrentText(""); 
+    setNewTodo('');
+    setIsEditing(false);
+  };
 
-  const handleEditTodo = useCallback(async (index: number) => {
+  const handleEditTodo = (index: number, text: string) => {
+    setCurrentId(index); 
+    setCurrentText(text); 
+    console.log('edit id : ', currectId);
+    console.log('edit text : ', currentText);
     setIsEditing(true);
-  }, [newTodo]);
+  };
 
   const handleCreateTodo = useCallback(async () => {
     let allTodos: TodoItem[] = [];
@@ -140,11 +152,18 @@ const handleSaveUpdate = useCallback(async (index: number) => {
   return (
     <View style={styles.container}>
       <View style={styles.newTodoContainer}>
-        <TextInput
-          style={styles.newTodoInput}
-          value={newTodo}
-          onChangeText={setNewTodo}
-        />
+      {isEditing ?<TextInput
+          style={styles.newTodoInput} 
+          value={currentText}
+          onChangeText={(newText) => {
+            console.log('newText : ', newText);
+            setCurrentText(newText)}}
+          // onChangeText={setCurrentText}
+        /> : <TextInput
+        style={styles.newTodoInput}
+        value={newTodo}
+        onChangeText={setNewTodo}
+      />}
         {isEditing ? <View style={styles.editCancelButton}>    
         <CustomButton title='Cancel' style={styles.cancelButton} onPress={handleCancelEdit}/>
         <CustomButton title='Save' style={styles.SaveButton} onPress={handleSaveUpdate}/>
@@ -175,7 +194,7 @@ const handleSaveUpdate = useCallback(async (index: number) => {
               size={24}
               color="blue"
               style={{marginRight: 10}}
-              onPress={() => handleEditTodo(index)}
+              onPress={() => handleEditTodo(todo.id, todo.text)}
             />
             <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(todo.id)}/>
             </View>
