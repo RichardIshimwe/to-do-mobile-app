@@ -20,11 +20,12 @@ export default Todo;
 
 const styles = StyleSheet.create({
   container: {
-    width: '80%',
+    width: '75%',
     // height: 60,
     alignItems: 'center',
     justifyContent: 'space-between',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    // backgroundColor: 'black'
   },
 
   todoText: {

@@ -70,15 +70,6 @@ const TodoList: React.FC = () => {
     
   }, [])
 
-  // useEffect(() => {
-  //   createTable();
-  //   getAllTodos();
-  // }, []);
-
-  // useEffect(() => {
-  //   getAllTodos();
-  // }, [newTodo]);
-
   const handleCreateTodo = useCallback(async () => {
     let allTodos: TodoItem[] = [];
    db.transaction((tx) => {
@@ -94,7 +85,6 @@ const TodoList: React.FC = () => {
       setTodos(allTodos);
     })
    });
-    // setTodos(current => [...current, { text: newTodo, isToggled: false }]);
     setNewTodo('');
   }, [newTodo]);
 
@@ -159,6 +149,16 @@ const TodoList: React.FC = () => {
             <CheckBox
             checked={todo.isToggled}
             onPress={() => handleToggleTodo(todo.id, todo.isToggled)}
+            containerStyle={styles.checkboxContainer}
+            textStyle={styles.checkboxText}
+            checkedColor="green"
+            />
+            <FontAwesome
+              name="edit"
+              size={24}
+              color="blue"
+              style={{marginRight: 10}}
+              // onPress={() => handleEditTodo(index)}
             />
             <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(todo.id)}/>
             </View>
@@ -182,6 +182,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  checkboxContainer: {
+    padding: 0, 
+    margin: 0,
+  },
+
+  checkboxText: {
+    marginRight: 0,
   },
 
   newTodoContainer: {
