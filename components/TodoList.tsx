@@ -98,16 +98,24 @@ const TodoList: React.FC = () => {
     setNewTodo('');
   }, [newTodo]);
 
-  const handleToggleTodo = useCallback(async (index: number) => {
-    setTodos(current =>
-      current.map((todo, i) => {
-        return index === i ? { ...todo, isToggled: !todo.isToggled } : todo;
-      }),
-    );
+  const handleToggleTodo = useCallback(async (index: number, isToggled: boolean) => {
+    let allTodos: TodoItem[] = [];
+    db.transaction((tx) => {
+      tx.executeSql('UPDATE todos SET isToggled = ? WHERE id = ?', [isToggled == true ? 0 : 1,index], (tx, result) => {
+      })
+      tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+        let len = results.rows.length;
+        for(let i = 0; i < len; i++){
+          let row = results.rows.item(i);
+          let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+          allTodos.push(finalRow); 
+        }
+        setTodos(allTodos);
+      })
+     });
   }, []);
 
   const handleDeleteTodo = useCallback(async (index: number) => {
-    console.log("The id is : ", index);
     let allTodos: TodoItem[] = [];
     db.transaction((tx) => {
       tx.executeSql('DELETE FROM todos WHERE id = ? ', [index], (tx, result) => {
@@ -122,7 +130,6 @@ const TodoList: React.FC = () => {
         setTodos(allTodos);
       })
      });
-    // setTodos(current => current.filter((_, i) => i !== index));
   }, []);
 
   return (
@@ -151,7 +158,7 @@ const TodoList: React.FC = () => {
             <View style={styles.iconsCont}>
             <CheckBox
             checked={todo.isToggled}
-            onPress={() => handleToggleTodo(index)}
+            onPress={() => handleToggleTodo(todo.id, todo.isToggled)}
             />
             <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(todo.id)}/>
             </View>
