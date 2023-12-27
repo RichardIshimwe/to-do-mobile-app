@@ -21,6 +21,7 @@ const TodoList: React.FC = () => {
   
   const [newTodo, setNewTodo] = useState('');
   const [todos, setTodos] = useState<TodoItem[]>([]);
+  const [todosList, setTodosList] = useState<TodoItem[]>([]);
 
   const db = SQLite.openDatabase('todos.db');
 
@@ -32,9 +33,30 @@ const TodoList: React.FC = () => {
     })
   }
 
-  const getAllTodos = () => {
-    let allTodos: TodoItem[] = [];
-    db.transaction((tx) => {
+  // const getAllTodos = async () => {
+  //   let allTodos: TodoItem[] = [];
+  //   db.transaction(async (tx) => {
+  //    tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+  //       console.log('Query executed');
+  //       let len = results.rows.length;
+  //       console.log(`this is the length : ${len}`)
+  //       for(let i = 0; i < len; i++){
+  //         let row = results.rows.item(i);
+  //         let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+  //         allTodos.push(finalRow);
+  //         console.log(finalRow);
+  //       }
+  
+  //     })
+  //    });
+  //    setTodosList(allTodos);
+  // }
+
+  useEffect(() => {
+
+    const handleCreateTodo = async () => {
+      let allTodos: TodoItem[] = [];
+     db.transaction((tx) => {
       tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
         console.log('Query executed');
         let len = results.rows.length;
@@ -42,42 +64,47 @@ const TodoList: React.FC = () => {
         for(let i = 0; i < len; i++){
           let row = results.rows.item(i);
           let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
-          allTodos.push(finalRow);
-          console.log(finalRow);
+          allTodos.push(finalRow); 
         }
-  
+        console.log("all todos : ", allTodos);
+        setTodos(allTodos);
       })
      });
-     setTodos(allTodos);
-  }
+      setNewTodo('');
+    };
+    handleCreateTodo();
+    
+  }, [])
 
-  useEffect(() => {
-    createTable();
-  }, []);
+  // useEffect(() => {
+  //   createTable();
+  //   getAllTodos();
+  // }, []);
 
   // useEffect(() => {
   //   getAllTodos();
   // }, [newTodo]);
 
   const handleCreateTodo = useCallback(async () => {
-  //  db.transaction((tx) => {
-  //   // tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
-  //   //   console.log(results);
-  //   // })
-  //   tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-  //     console.log('Query executed');
-  //     let len = results.rows.length;
-  //     console.log(`this is the length : ${len}`)
-  //     for(let i = 0; i < len; i++){
-  //       let row = results.rows.item(i);
-  //       console.log(row);
-  //     }
-
-  //   })
-  //  })
-
-    setTodos(current => [...current, { text: newTodo, isToggled: false }]);
-
+    let allTodos: TodoItem[] = [];
+   db.transaction((tx) => {
+    tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
+      console.log("the result",results);
+    });
+    tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+      console.log('Query executed');
+      let len = results.rows.length;
+      console.log(`this is the length : ${len}`)
+      for(let i = 0; i < len; i++){
+        let row = results.rows.item(i);
+        let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+        allTodos.push(finalRow); 
+      }
+      console.log("all todos : ", allTodos);
+      setTodos(allTodos);
+    })
+   });
+    // setTodos(current => [...current, { text: newTodo, isToggled: false }]);
     setNewTodo('');
   }, [newTodo]);
 
@@ -90,7 +117,29 @@ const TodoList: React.FC = () => {
   }, []);
 
   const handleDeleteTodo = useCallback(async (index: number) => {
-    setTodos(current => current.filter((_, i) => i !== index));
+    console.log("fucntion called");
+    let allTodos: TodoItem[] = [];
+    db.transaction((tx) => {
+      // tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
+      //   console.log("the result",results);
+      // });
+      tx.executeSql('DELETE FROM todos WHERE id = ? ', [index], (tx, result) => {
+        console.log("the result",result);
+      })
+      tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+        console.log('Query executed');
+        let len = results.rows.length;
+        console.log(`this is the length : ${len}`)
+        for(let i = 0; i < len; i++){
+          let row = results.rows.item(i);
+          let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+          allTodos.push(finalRow); 
+        }
+        console.log("all todos : ", allTodos);
+        setTodos(allTodos);
+      })
+     });
+    // setTodos(current => current.filter((_, i) => i !== index));
   }, []);
 
   return (
