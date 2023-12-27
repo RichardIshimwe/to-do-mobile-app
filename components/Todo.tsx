@@ -10,7 +10,7 @@ interface TodoProps {
 const Todo: React.FC<TodoProps> = ({ text, isToggled }) => {
   return (
     <View style={styles.container}>
-      {/* <TextInput style={styles.todoText}>{text}</TextInput> */}
+      {/* <TextInput style={styles.todoText} value={text}/> */}
       <Text style={[styles.todoText, isToggled && styles.toggled]}>{text}</Text>
     </View>
   );
@@ -21,7 +21,7 @@ export default Todo;
 const styles = StyleSheet.create({
   container: {
     width: '80%',
-    height: 30,
+    // height: 60,
     alignItems: 'center',
     justifyContent: 'space-between',
     flexDirection: 'row'
