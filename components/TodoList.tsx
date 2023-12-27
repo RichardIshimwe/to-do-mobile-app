@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,19 +8,74 @@ import {
 } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import * as SQLite from 'react-native-sqlite-storage';
+import * as SQLite from 'expo-sqlite';
 import Todo from './Todo';
 
 interface TodoItem {
+  id?: number;
   text: string;
-  isToggled: boolean;
+  isToggled: boolean | number;
 }
 
 const TodoList: React.FC = () => {
+  
   const [newTodo, setNewTodo] = useState('');
   const [todos, setTodos] = useState<TodoItem[]>([]);
 
+  const db = SQLite.openDatabase('todos.db');
+
+  const createTable = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, isToggled INTEGER);'
+      )
+    })
+  }
+
+  const getAllTodos = () => {
+    let allTodos: TodoItem[] = [];
+    db.transaction((tx) => {
+      tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+        console.log('Query executed');
+        let len = results.rows.length;
+        console.log(`this is the length : ${len}`)
+        for(let i = 0; i < len; i++){
+          let row = results.rows.item(i);
+          let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+          allTodos.push(finalRow);
+          console.log(finalRow);
+        }
+  
+      })
+     });
+     setTodos(allTodos);
+  }
+
+  useEffect(() => {
+    createTable();
+  }, []);
+
+  // useEffect(() => {
+  //   getAllTodos();
+  // }, [newTodo]);
+
   const handleCreateTodo = useCallback(async () => {
+  //  db.transaction((tx) => {
+  //   // tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
+  //   //   console.log(results);
+  //   // })
+  //   tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+  //     console.log('Query executed');
+  //     let len = results.rows.length;
+  //     console.log(`this is the length : ${len}`)
+  //     for(let i = 0; i < len; i++){
+  //       let row = results.rows.item(i);
+  //       console.log(row);
+  //     }
+
+  //   })
+  //  })
+
     setTodos(current => [...current, { text: newTodo, isToggled: false }]);
 
     setNewTodo('');
