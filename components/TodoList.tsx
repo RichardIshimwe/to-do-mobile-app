@@ -9,6 +9,7 @@ import {
 import { CheckBox } from 'react-native-elements';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import * as SQLite from 'expo-sqlite';
+import CustomButton from './Button';
 import Todo from './Todo';
 
 interface TodoItem {
@@ -21,7 +22,7 @@ const TodoList: React.FC = () => {
   
   const [newTodo, setNewTodo] = useState('');
   const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [todosList, setTodosList] = useState<TodoItem[]>([]);
+  const [isEditing, setIsEditing] = useState(true);
 
   const db = SQLite.openDatabase('todos.db');
 
@@ -31,23 +32,11 @@ const TodoList: React.FC = () => {
         'CREATE TABLE IF NOT EXISTS todos (id INTEGER PRIMARY KEY AUTOINCREMENT, text TEXT, isToggled INTEGER);'
       )
     })
-  }
+  };
 
-  // const getAllTodos = async () => {
-  //   let allTodos: TodoItem[] = [];
-  //   db.transaction(async (tx) => {
-  //    tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-  //       let len = results.rows.length;
-  //       for(let i = 0; i < len; i++){
-  //         let row = results.rows.item(i);
-  //         let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
-  //         allTodos.push(finalRow);
-  //       }
-  
-  //     })
-  //    });
-  //    setTodosList(allTodos);
-  // }
+  useEffect(() => {
+   createTable();    
+  }, []);
 
   useEffect(() => {
 
@@ -69,6 +58,32 @@ const TodoList: React.FC = () => {
     handleCreateTodo();
     
   }, [])
+
+const handleCancelEdit = () => {
+  setIsEditing(false);
+}
+
+const handleSaveUpdate = useCallback(async (index: number) => {
+  //   let allTodos: TodoItem[] = [];
+  //  db.transaction((tx) => {
+  //   tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
+  //   });
+  //   tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
+  //     let len = results.rows.length;
+  //     for(let i = 0; i < len; i++){
+  //       let row = results.rows.item(i);
+  //       let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
+  //       allTodos.push(finalRow); 
+  //     }
+  //     setTodos(allTodos);
+  //   })
+  //  });
+  //   setNewTodo('');
+  }, [newTodo]);
+
+  const handleEditTodo = useCallback(async (index: number) => {
+    setIsEditing(true);
+  }, [newTodo]);
 
   const handleCreateTodo = useCallback(async () => {
     let allTodos: TodoItem[] = [];
@@ -130,7 +145,10 @@ const TodoList: React.FC = () => {
           value={newTodo}
           onChangeText={setNewTodo}
         />
-        <Button title="Create" onPress={handleCreateTodo} />
+        {isEditing ? <View style={styles.editCancelButton}>    
+        <CustomButton title='Cancel' style={styles.cancelButton} onPress={handleCancelEdit}/>
+        <CustomButton title='Save' style={styles.SaveButton} onPress={handleSaveUpdate}/>
+        </View> : <Button title="Create" onPress={handleCreateTodo} />}
       </View>
 
       <View style={styles.todosContainer}>
@@ -138,7 +156,6 @@ const TodoList: React.FC = () => {
           <TouchableOpacity
           style={styles.todo}
             key={String(index)}
-            // onPress={() => handleToggleTodo(index)}
           >
             <Todo
               key={String(index)}
@@ -158,7 +175,7 @@ const TodoList: React.FC = () => {
               size={24}
               color="blue"
               style={{marginRight: 10}}
-              // onPress={() => handleEditTodo(index)}
+              onPress={() => handleEditTodo(index)}
             />
             <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(todo.id)}/>
             </View>
@@ -176,7 +193,24 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-
+  editCancelButton: { 
+    flexDirection: 'row',
+  },
+  cancelButton: {
+    backgroundColor: "red",
+    width: '48%',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12
+  },
+  SaveButton: {
+    backgroundColor: "#009688",
+    marginLeft: 10,
+    width: '48%',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12
+  },
   iconsCont : {
     flex: 1,
     flexDirection: 'row',
@@ -199,7 +233,7 @@ const styles = StyleSheet.create({
 
   newTodoInput: {
     height: 48,
-    marginBottom: 20,
+    marginBottom: 10,
     borderWidth: 1,
     borderRadius: 5,
     borderColor: '#aaa',
