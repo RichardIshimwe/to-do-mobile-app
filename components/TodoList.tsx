@@ -12,9 +12,9 @@ import * as SQLite from 'expo-sqlite';
 import Todo from './Todo';
 
 interface TodoItem {
-  id?: number;
+  id: number;
   text: string;
-  isToggled: boolean | number;
+  isToggled: boolean;
 }
 
 const TodoList: React.FC = () => {
@@ -37,14 +37,11 @@ const TodoList: React.FC = () => {
   //   let allTodos: TodoItem[] = [];
   //   db.transaction(async (tx) => {
   //    tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-  //       console.log('Query executed');
   //       let len = results.rows.length;
-  //       console.log(`this is the length : ${len}`)
   //       for(let i = 0; i < len; i++){
   //         let row = results.rows.item(i);
   //         let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
   //         allTodos.push(finalRow);
-  //         console.log(finalRow);
   //       }
   
   //     })
@@ -58,15 +55,12 @@ const TodoList: React.FC = () => {
       let allTodos: TodoItem[] = [];
      db.transaction((tx) => {
       tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-        console.log('Query executed');
         let len = results.rows.length;
-        console.log(`this is the length : ${len}`)
         for(let i = 0; i < len; i++){
           let row = results.rows.item(i);
           let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
           allTodos.push(finalRow); 
         }
-        console.log("all todos : ", allTodos);
         setTodos(allTodos);
       })
      });
@@ -89,18 +83,14 @@ const TodoList: React.FC = () => {
     let allTodos: TodoItem[] = [];
    db.transaction((tx) => {
     tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
-      console.log("the result",results);
     });
     tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-      console.log('Query executed');
       let len = results.rows.length;
-      console.log(`this is the length : ${len}`)
       for(let i = 0; i < len; i++){
         let row = results.rows.item(i);
         let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
         allTodos.push(finalRow); 
       }
-      console.log("all todos : ", allTodos);
       setTodos(allTodos);
     })
    });
@@ -117,25 +107,18 @@ const TodoList: React.FC = () => {
   }, []);
 
   const handleDeleteTodo = useCallback(async (index: number) => {
-    console.log("fucntion called");
+    console.log("The id is : ", index);
     let allTodos: TodoItem[] = [];
     db.transaction((tx) => {
-      // tx.executeSql('INSERT INTO todos (text, isToggled) VALUES (?, ?)', [newTodo, 0], (tx, results) => {
-      //   console.log("the result",results);
-      // });
       tx.executeSql('DELETE FROM todos WHERE id = ? ', [index], (tx, result) => {
-        console.log("the result",result);
       })
       tx.executeSql('SELECT * FROM todos', [], (tx, results) => {
-        console.log('Query executed');
         let len = results.rows.length;
-        console.log(`this is the length : ${len}`)
         for(let i = 0; i < len; i++){
           let row = results.rows.item(i);
           let finalRow = {id: row.id, text: row.text, isToggled: row.isToggled == 1 ? true : false};
           allTodos.push(finalRow); 
         }
-        console.log("all todos : ", allTodos);
         setTodos(allTodos);
       })
      });
@@ -170,7 +153,7 @@ const TodoList: React.FC = () => {
             checked={todo.isToggled}
             onPress={() => handleToggleTodo(index)}
             />
-            <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(index)}/>
+            <FontAwesome name="trash" size={24} color="red" onPress={() => handleDeleteTodo(todo.id)}/>
             </View>
           </TouchableOpacity>
         ))}
