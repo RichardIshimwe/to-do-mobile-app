@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
 
 interface TodoProps {
   text: string;
@@ -10,7 +9,6 @@ interface TodoProps {
 const Todo: React.FC<TodoProps> = ({ text, isToggled }) => {
   return (
     <View style={styles.container}>
-      {/* <TextInput style={styles.todoText} value={text}/> */}
       <Text style={[styles.todoText, isToggled && styles.toggled]}>{text}</Text>
     </View>
   );
